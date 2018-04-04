@@ -1,9 +1,9 @@
 package com.wangyanrui.demo;
 
 import com.alibaba.fastjson.JSONObject;
-import com.wangyanrui.common.command.Command;
 import com.wangyanrui.common.command.CommandRequest;
 import com.wangyanrui.common.command.CommandResponse;
+import com.wangyanrui.common.command.annotation.Command;
 import org.springframework.stereotype.Component;
 
 @Command("demo")

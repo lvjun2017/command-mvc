@@ -1,11 +1,9 @@
-package com.wangyanrui.common.command;
+package com.wangyanrui.common.command.annotation;
 
 import java.lang.annotation.*;
 
 /**
- * You Command Component must be annotation
- * You Command Component's Method cloud be annotation
- * (We will add an attribute to custom action key in the future)
+ * You Command Component and method must be annotation
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

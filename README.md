@@ -29,12 +29,12 @@
     <property name="handlerList">
         <list>
             <!-- 
-                You business component and method must annotation @com.wangyanrui.common.command.Command
+                You business component and method must annotation @com.wangyanrui.common.command.annotation.Command
                 
-                @com.wangyanrui.common.command.Command has a field (`value`), 
+                @com.wangyanrui.common.command.annotation.Command has a field (`value`), 
                 you can customize the mapping relationships through this property
                 
-                The method who annotation  @com.wangyanrui.common.command.Command must have two parameter,
+                The method who annotation  @com.wangyanrui.common.command.annotation.Command must have two parameter,
                 first  :  com.wangyanrui.common.command.CommandRequest
                 second :  com.wangyanrui.common.command.CommandResponse
             -->

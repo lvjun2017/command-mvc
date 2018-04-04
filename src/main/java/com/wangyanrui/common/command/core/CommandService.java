@@ -1,9 +1,9 @@
 package com.wangyanrui.common.command.core;
 
-import com.wangyanrui.common.command.Command;
 import com.wangyanrui.common.command.CommandCodec;
 import com.wangyanrui.common.command.CommandRequest;
 import com.wangyanrui.common.command.CommandResponse;
+import com.wangyanrui.common.command.annotation.Command;
 import com.wangyanrui.common.command.util.AnnotationUtil;
 import com.wangyanrui.common.dto.Result;
 import com.wangyanrui.common.exception.OperaExceptionHandler;
