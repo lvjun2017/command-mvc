@@ -57,5 +57,5 @@
     3. com.wangyanrui.demo
 
 ### 4. TIP
-    current jar dependency spring-context and spring-web (5.0.4)
-    When the spring version is conflicting, you must manually exclude
+    Current framework dependency spring-context and spring-web (5.0.4)
+    You must manually exclude spring when the spring version is conflicting
