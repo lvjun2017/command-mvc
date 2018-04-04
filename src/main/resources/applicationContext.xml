@@ -6,7 +6,8 @@
     <bean id="commandService" class="com.wangyanrui.common.command.core.CommandService">
         <property name="handlerMapped">
             <map>
-                <entry key="demo" value-ref="demo">
+                <entry key="demo">
+                    <bean class="com.wangyanrui.demo.DemoCommand"/>
                 </entry>
             </map>
         </property>
@@ -16,6 +17,4 @@
             </list>
         </property>
     </bean>
-
-    <bean id="demo" class="com.wangyanrui.common.command.service.DemoService"></bean>
 </beans>

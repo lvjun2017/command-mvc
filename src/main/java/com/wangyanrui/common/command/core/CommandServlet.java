@@ -6,6 +6,7 @@ import com.wangyanrui.common.creator.ResultCreator;
 import com.wangyanrui.common.dto.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -67,8 +68,11 @@ public class CommandServlet extends HttpServlet {
     public void init() throws ServletException {
         // init command service
         ApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-        this.commandService = applicationContext.getBean(CommandService.class);
-
+        try {
+            this.commandService = applicationContext.getBean(CommandService.class);
+        } catch (NoSuchBeanDefinitionException e) {
+            throw new ServletException("CommandService no definition, init error. ");
+        }
         super.init();
         logger.debug("Command Servlet init success. ");
     }

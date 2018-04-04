@@ -46,7 +46,7 @@ public class CommandService {
     public void setHandlerMapped(Map<String, Object> handlerMapped) {
         if (MapUtils.isNotEmpty(handlerMapped)) {
             this.handlerMapped = handlerMapped;
-            dealCommandAnnotation(this.handlerMapped);
+            dealCommandAnnotation();
         } else {
             logger.info("no init mapped relationship. ");
         }
@@ -101,26 +101,26 @@ public class CommandService {
 
     /**
      * deal all handler, pre save method to handlerMethodCache
-     *
-     * @param handlerMapped
      */
-    private void dealCommandAnnotation(Map<String, Object> handlerMapped) {
-        for (Map.Entry<String, Object> entry : handlerMapped.entrySet()) {
+    private void dealCommandAnnotation() {
+        for (Map.Entry<String, Object> entry : this.handlerMapped.entrySet()) {
             String serviceName = entry.getKey();
             Object handlerClazz = entry.getValue();
 
             OperaExceptionHandler.flagCheck(!AnnotationUtil.hasAnnotation(handlerClazz.getClass(), Command.class),
                     "error mapped relation : " + serviceName + " (not annotation @Command)");
 
-            // if this handler class has Command annotation
-            // deal method who tagged command annotation
-            // pre save this method to handlerMethodCache
+            /*
+               if this handler class has Command annotation
+               deal method who tagged command annotation
+               pre save this method to handlerMethodCache
+             */
             Method[] methods = handlerClazz.getClass().getDeclaredMethods();
 
             for (Method method : methods) {
                 if (AnnotationUtil.hasAnnotation(method, Command.class)) {
                     method.setAccessible(true);
-                    handlerMapped.put(serviceName + "." + method.getName(), method);
+                    this.handlerMethodCache.put(serviceName + "." + method.getName(), method);
                 }
             }
 
@@ -130,22 +130,24 @@ public class CommandService {
     /**
      * get real business method
      *
-     * @param commandRequest
-     * @param realService
+     * @param commandRequest CommandRequest
+     * @param realService    You Command Component
      * @return
      */
     private Method getBusinessMethod(CommandRequest commandRequest, Object realService) {
         // get real service bean's method
-        Method method = handlerMethodCache.get(commandRequest.getActionName());
+        Method method = this.handlerMethodCache.get(commandRequest.getActionName());
         if (null == method) {
-            // not require synchronized because used by ConcurrentHashMap
-            try {
-                method = realService.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
-            } catch (Throwable e) {
-                OperaExceptionHandler.throwException("no mapped about service.method : " + commandRequest.getActionName());
-            }
-            method.setAccessible(true);
-            handlerMethodCache.put(commandRequest.getActionName(), method);
+            // // not require synchronized because used by ConcurrentHashMap
+            // try {
+            //     method = realService.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
+            // } catch (Throwable e) {
+            //     OperaExceptionHandler.throwException("no mapped about service.method : " + commandRequest.getActionName());
+            // }
+            // method.setAccessible(true);
+            // handlerMethodCache.put(commandRequest.getActionName(), method);
+
+            OperaExceptionHandler.throwException("no mapped about service.method : " + commandRequest.getActionName());
         }
         return method;
     }
