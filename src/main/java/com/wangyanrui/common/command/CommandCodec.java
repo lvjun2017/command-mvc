@@ -49,7 +49,7 @@ public class CommandCodec {
 
         return new CommandRequest()
                 .setActionName(action)
-                .setServiceName(serviceName)
+                .setComponentName(serviceName)
                 .setMethodName(methodName)
                 .setData(in);
     }

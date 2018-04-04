@@ -4,12 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="commandService" class="com.wangyanrui.common.command.core.CommandService">
-        <property name="handlerMapped">
-            <map>
-                <entry key="demo">
-                    <bean class="com.wangyanrui.demo.DemoCommand"/>
-                </entry>
-            </map>
+        <property name="handlerList">
+            <list>
+                <bean class="com.wangyanrui.demo.DemoCommand"/>
+            </list>
         </property>
         <property name="filters">
             <list>

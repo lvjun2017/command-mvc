@@ -14,7 +14,7 @@ public class CommandRequest {
     /**
      * Eg. user
      */
-    private String serviceName;
+    private String componentName;
     /**
      * Eg. save
      */

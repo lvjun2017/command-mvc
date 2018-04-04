@@ -7,7 +7,8 @@ import com.wangyanrui.common.command.CommandResponse;
 import com.wangyanrui.common.command.util.AnnotationUtil;
 import com.wangyanrui.common.dto.Result;
 import com.wangyanrui.common.exception.OperaExceptionHandler;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandService {
@@ -28,10 +30,17 @@ public class CommandService {
      * filters
      */
     private List<CommandFilter> filters = new ArrayList<>();
+
+    /**
+     * businesses service list
+     */
+    private List<Object> handlerList = new ArrayList<>();
+
     /**
      * businesses service mapped relationship
      */
     private Map<String, Object> handlerMapped = new ConcurrentHashMap<>();
+
     /**
      * businesses service's method cache
      * key   : action(service.method)
@@ -43,9 +52,9 @@ public class CommandService {
         this.filters = filters;
     }
 
-    public void setHandlerMapped(Map<String, Object> handlerMapped) {
-        if (MapUtils.isNotEmpty(handlerMapped)) {
-            this.handlerMapped = handlerMapped;
+    public void setHandlerList(List<Object> handlerList) {
+        if (CollectionUtils.isNotEmpty(handlerList)) {
+            this.handlerList = handlerList;
             dealCommandAnnotation();
         } else {
             logger.info("no init mapped relationship. ");
@@ -63,12 +72,12 @@ public class CommandService {
         // build command request bean
         CommandRequest commandRequest = CommandCodec.decodeRequest(req);
 
-        // get real service bean
-        Object realService = handlerMapped.get(commandRequest.getServiceName());
-        OperaExceptionHandler.nullCheck(realService, "no mapped about service : " + commandRequest.getServiceName());
+        // get component bean
+        Object component = handlerMapped.get(commandRequest.getComponentName());
+        OperaExceptionHandler.nullCheck(component, "no mapped about component : " + commandRequest.getComponentName());
 
-        // get business method
-        Method method = getBusinessMethod(commandRequest, realService);
+        // get component method
+        Method method = getComponentMethod(commandRequest, component);
 
         CommandResponse commandResponse = new CommandResponse();
 
@@ -82,7 +91,7 @@ public class CommandService {
 
         // do businesses
         try {
-            method.invoke(realService, commandRequest, commandResponse);
+            method.invoke(component, commandRequest, commandResponse);
         } catch (IllegalAccessException | InvocationTargetException e) {
             OperaExceptionHandler.throwException(e);
         }
@@ -103,12 +112,15 @@ public class CommandService {
      * deal all handler, pre save method to handlerMethodCache
      */
     private void dealCommandAnnotation() {
-        for (Map.Entry<String, Object> entry : this.handlerMapped.entrySet()) {
-            String serviceName = entry.getKey();
-            Object handlerClazz = entry.getValue();
-
+        for (Object handlerClazz : this.handlerList) {
             OperaExceptionHandler.flagCheck(!AnnotationUtil.hasAnnotation(handlerClazz.getClass(), Command.class),
-                    "error mapped relation : " + serviceName + " (not annotation @Command)");
+                    "error mapped relation : " + handlerClazz.getClass() + " (not annotation @Command)");
+
+            // auto generate mapped key
+            String componentCommandValue = handlerClazz.getClass().getAnnotation(Command.class).value();
+            String componentName = StringUtils.isNotEmpty(componentCommandValue) ?
+                    componentCommandValue :
+                    StringUtils.uncapitalize(handlerClazz.getClass().getSimpleName());
 
             /*
                if this handler class has Command annotation
@@ -118,12 +130,24 @@ public class CommandService {
             Method[] methods = handlerClazz.getClass().getDeclaredMethods();
 
             for (Method method : methods) {
-                if (AnnotationUtil.hasAnnotation(method, Command.class)) {
-                    method.setAccessible(true);
-                    this.handlerMethodCache.put(serviceName + "." + method.getName(), method);
-                }
-            }
+                Command annotation = method.getAnnotation(Command.class);
+                OperaExceptionHandler.flagCheck(Objects.isNull(method.getAnnotation(Command.class)),
+                        "1");
+                // "error mapped relation : " + method.getName() + " (not annotation @Command)"
+                method.setAccessible(true);
 
+                // auto generate method key
+                String methodCommandValue = method.getAnnotation(Command.class).value();
+                String methodName = StringUtils.isNotEmpty(methodCommandValue) ?
+                        methodCommandValue :
+                        StringUtils.uncapitalize(method.getName());
+
+                String mappedKey = componentName + "." + methodName;
+                OperaExceptionHandler.flagCheck(this.handlerMethodCache.containsKey(mappedKey),
+                        "");
+
+                this.handlerMethodCache.put(mappedKey, method);
+            }
         }
     }
 
@@ -131,18 +155,18 @@ public class CommandService {
      * get real business method
      *
      * @param commandRequest CommandRequest
-     * @param realService    You Command Component
+     * @param component      You Command Component
      * @return
      */
-    private Method getBusinessMethod(CommandRequest commandRequest, Object realService) {
+    private Method getComponentMethod(CommandRequest commandRequest, Object component) {
         // get real service bean's method
         Method method = this.handlerMethodCache.get(commandRequest.getActionName());
         if (null == method) {
             // // not require synchronized because used by ConcurrentHashMap
             // try {
-            //     method = realService.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
+            //     method = component.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
             // } catch (Throwable e) {
-            //     OperaExceptionHandler.throwException("no mapped about service.method : " + commandRequest.getActionName());
+            //     OperaExceptionHandler.throwException("no mapped about component.method : " + commandRequest.getActionName());
             // }
             // method.setAccessible(true);
             // handlerMethodCache.put(commandRequest.getActionName(), method);

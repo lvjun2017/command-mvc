@@ -6,11 +6,11 @@ import com.wangyanrui.common.command.CommandRequest;
 import com.wangyanrui.common.command.CommandResponse;
 import org.springframework.stereotype.Component;
 
-@Command
+@Command("demo")
 @Component
 public class DemoCommand {
 
-    @Command
+    // @Command
     public void hello(CommandRequest request, CommandResponse response) {
         JSONObject in = request.getData();
 
