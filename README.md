@@ -52,7 +52,7 @@
 
 ### 2. interactive
     
-    You have to pass a parameter who named 'action(mappedKey.methodName)' by generic type or json 
+    You have to pass a parameter who named 'action(handlerKey.methodName)' by generic type or json 
     Eg. action=user.save
 
 ### 3. demo
