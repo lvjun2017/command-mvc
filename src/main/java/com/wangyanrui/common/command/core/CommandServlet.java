@@ -43,7 +43,7 @@ public class CommandServlet extends HttpServlet {
 
         Result result;
         try {
-            result = commandService.handle(req);
+            result = commandService.handle(req, resp);
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             out.println(JSONObject.toJSONString(ResultCreator.getFail(e.getMessage())));

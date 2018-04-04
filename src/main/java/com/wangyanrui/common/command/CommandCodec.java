@@ -66,17 +66,6 @@ public class CommandCodec {
     }
 
     /**
-     * get Result when filter return false
-     *
-     * @param
-     * @return
-     */
-    public static Result encodeFilterResult() {
-        return ResultCreator.getSuccess();
-    }
-
-
-    /**
      * convert GenericParams and JSON InputStream params
      *
      * @param req

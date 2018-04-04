@@ -10,10 +10,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class CommandResponse {
     /**
-     * Mainly used for filter processing
-     */
-    private Exception exception;
-    /**
      * result of businesses processing
      */
     private Object result;
