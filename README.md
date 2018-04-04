@@ -13,11 +13,11 @@
 
 <!-- core Command Servlet -->
 <servlet>
-    <servlet-name>DispatcherServlet</servlet-name>
+    <servlet-name>CommandServlet</servlet-name>
     <servlet-class>com.wangyanrui.common.command.core.CommandServlet</servlet-class>
 </servlet>
 <servlet-mapping>
-    <servlet-name>DispatcherServlet</servlet-name>
+    <servlet-name>CommandServlet</servlet-name>
     <url-pattern>/*</url-pattern>
 </servlet-mapping>
 ```
