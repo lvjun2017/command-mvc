@@ -52,7 +52,7 @@ public class CommandService {
         this.filters = filters;
     }
 
-    public void setHandlerList(List<Object> handlerList) {
+    public void setHandlerList(List<Object> handlerList) throws Exception {
         if (CollectionUtils.isNotEmpty(handlerList)) {
             this.handlerList = handlerList;
             dealCommandAnnotation();
@@ -118,35 +118,40 @@ public class CommandService {
 
             // auto generate mapped key
             String componentCommandValue = handlerClazz.getClass().getAnnotation(Command.class).value();
-            String componentName = StringUtils.isNotEmpty(componentCommandValue) ?
+            String handlerKey = StringUtils.isNotEmpty(componentCommandValue) ?
                     componentCommandValue :
                     StringUtils.uncapitalize(handlerClazz.getClass().getSimpleName());
+            this.handlerMapped.put(handlerKey, handlerClazz);
 
             /*
-               if this handler class has Command annotation
-               deal method who tagged command annotation
-               pre save this method to handlerMethodCache
+               pre save method to handlerMethodCache who tagged command annotation in this handler
              */
-            Method[] methods = handlerClazz.getClass().getDeclaredMethods();
-
-            for (Method method : methods) {
-                Command annotation = method.getAnnotation(Command.class);
-                OperaExceptionHandler.flagCheck(Objects.isNull(method.getAnnotation(Command.class)),
-                        "1");
-                // "error mapped relation : " + method.getName() + " (not annotation @Command)"
+            for (Method method : handlerClazz.getClass().getDeclaredMethods()) {
                 method.setAccessible(true);
 
-                // auto generate method key
-                String methodCommandValue = method.getAnnotation(Command.class).value();
-                String methodName = StringUtils.isNotEmpty(methodCommandValue) ?
-                        methodCommandValue :
-                        StringUtils.uncapitalize(method.getName());
+                Command annotation = method.getAnnotation(Command.class);
+                if (Objects.nonNull(annotation)) {
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    OperaExceptionHandler.flagCheck(
+                            parameterTypes.length != 2 || parameterTypes[0] != CommandRequest.class || parameterTypes[1] != CommandResponse.class,
+                            "\r\n" +
+                                    "Method annotation @Command, but the parameterTypes is error. \r\n" +
+                                    "Class : " + handlerClazz.getClass().getName() + "\r\n" +
+                                    "Method : " + method.getName()
+                    );
 
-                String mappedKey = componentName + "." + methodName;
-                OperaExceptionHandler.flagCheck(this.handlerMethodCache.containsKey(mappedKey),
-                        "");
+                    // auto generate method key
+                    String methodCommandValue = method.getAnnotation(Command.class).value();
+                    String methodName = StringUtils.isNotEmpty(methodCommandValue) ?
+                            methodCommandValue :
+                            StringUtils.uncapitalize(method.getName());
 
-                this.handlerMethodCache.put(mappedKey, method);
+                    String handlerMethodKey = handlerKey + "." + methodName;
+                    OperaExceptionHandler.flagCheck(this.handlerMethodCache.containsKey(handlerMethodKey),
+                            "");
+
+                    this.handlerMethodCache.put(handlerMethodKey, method);
+                }
             }
         }
     }
@@ -161,18 +166,22 @@ public class CommandService {
     private Method getComponentMethod(CommandRequest commandRequest, Object component) {
         // get real service bean's method
         Method method = this.handlerMethodCache.get(commandRequest.getActionName());
-        if (null == method) {
-            // // not require synchronized because used by ConcurrentHashMap
-            // try {
-            //     method = component.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
-            // } catch (Throwable e) {
-            //     OperaExceptionHandler.throwException("no mapped about component.method : " + commandRequest.getActionName());
-            // }
-            // method.setAccessible(true);
-            // handlerMethodCache.put(commandRequest.getActionName(), method);
 
-            OperaExceptionHandler.throwException("no mapped about service.method : " + commandRequest.getActionName());
-        }
+
+        OperaExceptionHandler.flagCheck(Objects.isNull(method),
+                "no mapped about component's method : " + commandRequest.getActionName());
+
+        // if (null == method) {
+        //     // not require synchronized because used by ConcurrentHashMap
+        //     try {
+        //         method = component.getClass().getMethod(commandRequest.getMethodName(), CommandRequest.class, CommandResponse.class);
+        //     } catch (Throwable e) {
+        //         OperaExceptionHandler.throwException("no mapped about component.method : " + commandRequest.getActionName());
+        //     }
+        //     method.setAccessible(true);
+        //     handlerMethodCache.put(commandRequest.getActionName(), method);
+        // }
+
         return method;
     }
 

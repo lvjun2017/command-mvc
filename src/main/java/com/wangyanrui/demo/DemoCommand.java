@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DemoCommand {
 
-    // @Command
+    @Command
     public void hello(CommandRequest request, CommandResponse response) {
         JSONObject in = request.getData();
 

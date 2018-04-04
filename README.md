@@ -26,20 +26,24 @@
 
 ```
 <bean id="commandService" class="com.wangyanrui.common.command.core.CommandService">
-    <property name="handlerMapped">
-        <map>
+    <property name="handlerList">
+        <list>
             <!-- 
-                you business component and method must annotation @com.wangyanrui.common.command.Command
+                You business component and method must annotation @com.wangyanrui.common.command.Command
                 
-                you business component's method could annotation @com.wangyanrui.common.command.Command,
-                if not, you action must be mappedKey:methodName
+                @com.wangyanrui.common.command.Command has a field (`value`), 
+                you can customize the mapping relationships through this property
+                
+                The method who annotation  @com.wangyanrui.common.command.Command must have two parameter,
+                first  :  com.wangyanrui.common.command.CommandRequest
+                second :  com.wangyanrui.common.command.CommandResponse
             -->
-            <entry key="mappedKey" value-ref="You Business Component"/>
-        </map>
+            <bean class="com.wangyanrui.demo.DemoCommand"/>
+        </list>
     </property>
     <property name="filters">
         <list>
-            <!-- 过滤器(implement com.wangyanrui.common.command.core.CommandFilter) -->
+            <!-- 过滤器(implement interface: com.wangyanrui.common.command.core.CommandFilter) -->
         </list>
     </property>
 </bean>
@@ -52,6 +56,7 @@
     Eg. action=user.save
 
 ### 3. demo
+
     1. web.xml    
     2. applicationContext.xml
     3. com.wangyanrui.demo
