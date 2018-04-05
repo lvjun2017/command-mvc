@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
 
-    <name>common-command</name>
+    <name>command-mvc</name>
     <groupId>com.wangyanrui</groupId>
-    <artifactId>common-command</artifactId>
+    <artifactId>command-mvc</artifactId>
     <version>1.0.0</version>
 
     <dependencies>
